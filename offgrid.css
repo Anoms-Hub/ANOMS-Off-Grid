@@ -1,0 +1,86 @@
+/* --- RESET --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #050505;
+  color: #e6e6e6;
+  font-family: "Inter", sans-serif;
+  line-height: 1.6;
+  padding: 40px;
+}
+
+/* --- AO FLOATING PANELS --- */
+.panel {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 40px;
+  backdrop-filter: blur(12px);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* --- HERO --- */
+.hero h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  max-width: 700px;
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+/* --- AO NEON GLOW --- */
+.neon {
+  color: #ff2df7;
+  text-shadow:
+    0 0 6px #ff2df7,
+    0 0 12px #ff2df7,
+    0 0 24px #00eaff,
+    0 0 48px #00eaff;
+}
+
+/* --- SECTION HEADERS --- */
+section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  color: #00eaff;
+}
+
+section p {
+  opacity: 0.85;
+  margin-bottom: 10px;
+}
+
+/* --- AO MICRO-DIVIDERS --- */
+.divider {
+  height: 1px;
+  width: 100%;
+  max-width: 900px;
+  margin: 40px auto;
+  background: linear-gradient(90deg, transparent, #00eaff, transparent);
+  opacity: 0.4;
+}
+
+/* --- AO IMAGE GLOW FRAMES --- */
+.img-glow {
+  border-radius: 10px;
+  box-shadow:
+    0 0 10px rgba(255,45,247,0.4),
+    0 0 20px rgba(0,234,255,0.3);
+}
+
+/* --- FOOTER --- */
+footer {
+  text-align: center;
+  opacity: 0.5;
+  margin-top: 60px;
+  font-size: 0.9rem;
+}
