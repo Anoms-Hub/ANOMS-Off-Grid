@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OFF GRID // SYSTEM INTERFACE</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            color: #a1a1aa;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            user-select: none;
+            position: relative;
+        }
+
+        /* Pure CSS Cyber Synth-Grid Backdrop Animation */
+        #fallback-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: 
+                linear-gradient(to right, rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 0, 85, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -3;
+            animation: gridMove 8s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 40px; }
+        }
+
+        #offgrid-app {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            box-sizing: border-box;
+            padding: 20px;
+            display: grid;
+            grid-template-rows: 80px 1fr;
+            gap: 20px;
+            z-index: 1;
+        }
+        .cyber-window {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
+            border: 2px solid #00f3ff;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2), inset 0 0 10px rgba(0, 243, 255, 0.1);
+            border-radius: 4px;
+            padding: 15px;
+            position: relative;
+        }
+        .cyber-window.accent {
+            border-color: #ff0055;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.2), inset 0 0 10px rgba(255, 0, 85, 0.1);
+        }
+        .window-title {
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            background: #000000;
+            border: 1px solid #00f3ff;
+            padding: 2px 8px;
+            font-weight: bold;
+            font-size: 11px;
+            letter-spacing: 2px;
+            border-radius: 3px;
+        }
+        .cyber-window.accent .window-title {
+            border-color: #ff0055;
+        }
+        .cyan-text { color: #00f3ff; text-shadow: 0 0 5px #00f3ff; }
+        .magenta-text { color: #ff0055; text-shadow: 0 0 5px #ff0055; }
+        
+        #terminal-log {
+            height: calc(100% - 40px);
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .log-entry {
+            margin-bottom: 6px;
+            border-left: 3px solid #00f3ff;
+            padding-left: 8px;
+        }
+
+        /* Macro Deck Layout Positioning */
+        #macro-deck {
+            position: fixed;
+            bottom: 35px;
+            right: 35px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        .macro-btn {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #ff0055;
+            color: #ff0055;
+            padding: 6px 12px;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 3px;
+            box-shadow: 0 0 8px rgba(255, 0, 85, 0.2);
+            transition: all 0.2s ease;
+        }
+        .macro-btn:hover {
+            background: #ff0055;
+            color: #000000;
+            box-shadow: 0 0 12px #ff0055;
+        }
+        .macro-btn.cyan-v {
+            border-color: #00f3ff;
+            color: #00f3ff;
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.2);
+        }
+        .macro-btn.cyan-v:hover {
+            background: #00f3ff;
+            color: #000000;
+            box-shadow: 0 0 12px #00f3ff;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="fallback-grid"></div>
+
+    <div id="offgrid-app"></div>
+
+    <div id="macro-deck">
+        <button class="macro-btn cyan-v" onclick="triggerMacro('scan')">SCAN GRID</button>
+        <button class="macro-btn" onclick="triggerMacro('clearance')">EXECUTE CLEARANCE</button>
+        <button class="macro-btn cyan-v" onclick="triggerMacro('shop')">VIEW UPGRADES</button>
+    </div>
+
+    <script>
+        // --- DATA INTERFACE SUBSYSTEM (UI) ---
+        const OffGridUI = (() => {
+            let dom = { appContainer: null, terminalLog: null, statusHUD: null };
+            const THEME = { background: "#000000", neonCyan: "#00f3ff", neonMagenta: "#ff0055", textDim: "#a1a1aa" };
+
+            function init() {
+                dom.appContainer = document.getElementById("offgrid-app");
+                injectVideoBackdrop();
+                buildHUD();
+                buildTerminal();
+                logSystemMessage("SYSTEM DEPLOYED: Visual overlay online.");
+                logSystemMessage("MODERATION PROTOCOL: INITIALIZED.");
+            }
+
+            function injectVideoBackdrop() {
+                const video = document.createElement("video");
+                video.id = "cyber-backdrop";
+                video.src = "b_a_e_b_d_mp_.mp4";
+                video.autoplay = true;
+                video.loop = true;
+                video.muted = true;
+                video.playsInline = true;
+                
+                video.style.position = "fixed";
+                video.style.top = "0";
+                video.style.left = "0";
+                video.style.width = "100vw";
+                video.style.height = "100vh";
+                video.style.objectFit = "cover";
+                video.style.zIndex = "-2";
+                
+                // Secure fault catch: If browser security blocks local mp4, fail gracefully without breaking execution loops
+                video.onerror = () => {
+                    console.log("Local browser security policy optimized to animated layout grid canvas.");
+                    video.remove();
+                };
+                
+                document.body.appendChild(video);
+
+                const overlay = document.createElement("div");
+                overlay.style.position = "fixed";
+                overlay.style.top = "0";
+                overlay.style.left = "0";
+                overlay.style.width = "100vw";
+                overlay.style.height = "100vh";
+                overlay.style.background = "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.85))";
+                overlay.style.zIndex = "-1";
+                
+                document.body.appendChild(overlay);
+            }
+
+            function buildHUD() {
+                const hud = document.createElement("div");
+                hud.className = "cyber-window";
+                hud.innerHTML = `
+                    <div class="window-title cyan-text">CORE NET SYSTEM STATUS</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; height: 100%; font-size: 13px;">
+                        <div>OPERATOR: <span class="magenta-text" id="hud-identity">ANOM</span></div>
+                        <div>SECURE LEVEL: <span class="cyan-text" id="hud-level">01</span></div>
+                        <div>GRID STABILITY: <span id="hud-stability" style="color: #55ff55; text-shadow: 0 0 5px #55ff55;">100%</span></div>
+                        <div>CREDITS: <span class="magenta-text" id="hud-currency">0 CR</span></div>
+                        <div>MOD STATUS: <span class="cyan-text" style="color: #55ff55; text-shadow: 0 0 5px #55ff55;">LEGENDARY</span></div>
+                    </div>
+                `;
+                dom.appContainer.appendChild(hud);
+                dom.statusHUD = hud;
+            }
+
+            function buildTerminal() {
+                const terminal = document.createElement("div");
+                terminal.className = "cyber-window accent";
+                terminal.style.display = "grid";
+                terminal.style.gridTemplateRows = "1fr 40px";
+                terminal.style.height = "calc(100% - 40px)";
+                
+                terminal.innerHTML = `
+                    <div class="window-title magenta-text">CONSOLE LOG_</div>
+                    <div id="terminal-log"></div>
+                    <div id="input-wrapper" style="display: flex; align-items: center; border-top: 1px solid ${THEME.neonMagenta}; padding-top: 10px;">
+                        <span class="magenta-text" style="margin-right: 10px; font-weight: bold;">&gt;</span>
+                        <input type="text" id="terminal-input" placeholder="ENTER PROTOCOL..." autocomplete="off" 
+                            style="background: transparent; border: none; color: #00f3ff; font-family: inherit; font-size: 14px; width: 100%; outline: none; text-shadow: 0 0 5px #00f3ff;">
+                    </div>
+                `;
+                
+                dom.appContainer.appendChild(terminal);
+                dom.terminalLog = terminal.querySelector("#terminal-log");
+
+                const inputField = terminal.querySelector("#terminal-input");
+                inputField.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter" && inputField.value.trim() !== "") {
+                        const command = inputField.value.trim();
+                        inputField.value = "";
+                        logSystemMessage(`<span style="color: #ffffff;">&gt; ${command}</span>`);
+                        if (window.OffGridEngine && typeof window.OffGridEngine.processCommand === "function") {
+                            window.OffGridEngine.processCommand(command);
+                        }
+                    }
+                });
+            }
+
+            function logSystemMessage(message) {
+                if (!dom.terminalLog) return;
+                const entry = document.createElement("div");
+                entry.className = "log-entry";
+                const timestamp = new Date().toLocaleTimeString();
+                entry.innerHTML = `[<span class="cyan-text">${timestamp}</span>] ${message}`;
+                dom.terminalLog.appendChild(entry);
+                dom.terminalLog.scrollTop = dom.terminalLog.scrollHeight;
+            }
+
+            function updateDisplay(gameState) {
+                const idElem = document.getElementById("hud-identity");
+                const lvlElem = document.getElementById("hud-level");
+                const curElem = document.getElementById("hud-currency");
+                const stabElem = document.getElementById("hud-stability");
+                
+                if (idElem) idElem.textContent = gameState.player.identity.toUpperCase();
+                if (lvlElem) lvlElem.textContent = String(gameState.player.level).padStart(2, '0');
+                if (curElem) curElem.textContent = `${gameState.player.currency} CR`;
+                
+                if (stabElem) {
+                    const stab = gameState.systems.gridStability;
+                    stabElem.textContent = `${stab}%`;
+                    if (stab > 70) { stabElem.style.color = "#55ff55"; stabElem.style.textShadow = "0 0 5px #55ff55"; }
+                    else if (stab > 40) { stabElem.style.color = "#ffaa00"; stabElem.style.textShadow = "0 0 5px #ffaa00"; }
+                    else { stabElem.style.color = "#ff3333"; stabElem.style.textShadow = "0 0 5px #ff3333"; }
+                }
+            }
+
+            return { init: init, log: logSystemMessage, update: updateDisplay, THEME: THEME };
+        })();
+
+        // --- PROCESSING LOOP CORE ENGINE ---
+        const OffGridEngine = (() => {
+            let state = {
+                initialized: false, isRunning: false, lastTick: 0, tickerTimer: 0, passiveFilterTimer: 0,
+                player: { identity: "Anom", status: "ACTIVE", level: 1, currency: 0, inventory: [] },
+                shop: {
+                    filter: { name: "Auto-Filter Subroutine", cost: 50, count: 0, desc: "Passively suppresses structural threat counts over time" },
+                    shield: { name: "Grid FireWall v2", cost: 120, count: 0, desc: "Reduces raw stability impact from matrix incidents" }
+                },
+                systems: { activeThreats: 0, gridStability: 100, moderationProtocol: { status: "LEGENDARY" } }
+            };
+
+            const CONFIG = { TICK_RATE: 1000 / 30, SAVE_KEY: "offgrid_player_state_v1", ALERT_INTERVAL: 8000, PASSIVE_CLEAN_INTERVAL: 10000 };
+            
+            function init() {
+                if (state.initialized) return;
+                loadGame();
+                OffGridUI.init();
+                state.initialized = true;
+                start();
+            }
+
+            function start() {
+                if (state.isRunning) return;
+                state.isRunning = true;
+                state.lastTick = performance.now();
+                reqAnimFrame();
+                OffGridUI.log("OFF GRID Engine: Operational loop initiated.");
+                OffGridUI.log("Type <span class='cyan-text'>help</span> to scan available terminal protocols.");
+            }
+
+            function reqAnimFrame() { if (state.isRunning) requestAnimationFrame(tick); }
+
+            function tick(now) {
+                let delta = now - state.lastTick;
+                if (delta >= CONFIG.TICK_RATE) { update(delta); render(); state.lastTick = now; }
+                reqAnimFrame();
+            }
+
+            function update(delta) {
+                state.tickerTimer += delta;
+                if (state.tickerTimer >= CONFIG.ALERT_INTERVAL) { state.tickerTimer = 0; generateGridIncident(); }
+                if (state.shop.filter.count > 0) {
+                    state.passiveFilterTimer += delta;
+                    if (state.passiveFilterTimer >= CONFIG.PASSIVE_CLEAN_INTERVAL) { state.passiveFilterTimer = 0; executePassiveFilter(); }
+                }
+            }
+
+            function render() { OffGridUI.update(state); }
+
+            function generateGridIncident() {
+                const incidents = [
+                    "CRITICAL IMPACT: Background detonation detected in Core Sector.",
+                    "LIGHTNING TRIP: EMP surge arcing across central memory matrices.",
+                    "AIR-TRAFFIC CORRUPTION: Hovercar telemetry drifting off-grid.",
+                    "VECTOR ALERT: Intrusion anomaly detected in sector 09.",
+                    "FILTER TRIPPED: Toxic signature blocked by moderation layer."
+                ];
+                state.systems.activeThreats += 1;
+                let finalDamage = Math.max(2, (Math.floor(Math.random() * 8) + 6) - (state.shop.shield.count * 3));
+                state.systems.gridStability = Math.max(0, state.systems.gridStability - finalDamage);
+                
+                const randomIncident = incidents[Math.floor(Math.random() * incidents.length)];
+                OffGridUI.log(`<span style='color: #ff0055; font-weight: bold;'>[!] ${randomIncident}</span>`);
+                OffGridUI.log(`ACTIVE THREATS: ${state.systems.activeThreats} | SYSTEM STABILITY: ${state.systems.gridStability}%`);
+            }
+
+            function executePassiveFilter() {
+                if (state.systems.activeThreats > 0) {
+                    state.systems.activeThreats--;
+                    let passiveEarning = state.shop.filter.count * 4;
+                    state.player.currency += passiveEarning;
+                    OffGridUI.log(`<span style='color: #55ff55;'>[SUBROUTINE] Auto-Filter cleared 1 threat node. Intercept bonus +${passiveEarning} CR logged.</span>`);
+                    saveGame();
+                }
+            }
+
+            function processCommand(rawInput) {
+                const args = rawInput.trim().toLowerCase().split(" ");
+                const cmd = args[0];
+
+                switch(cmd) {
+                    case "help":
+                        OffGridUI.log("AVAILABLE PROTOCOLS: [ status | scan | clearance | shop | buy | levelup | clear ]");
+                        break;
+                    case "status":
+                        OffGridUI.log(`OPERATOR: ${state.player.identity.toUpperCase()} // LVL: ${state.player.level} // STATUS: ${state.systems.moderationProtocol.status}`);
+                        break;
+                    case "scan":
+                        if (state.systems.activeThreats > 0) { OffGridUI.log(`<span class='magenta-text'>SCANNING... Found ${state.systems.activeThreats} memory anomalies. Execute 'clearance' protocol.</span>`); }
+                        else { OffGridUI.log("<span class='cyan-text'>SCANNING... Grid space 100% clean. Systems nominal.</span>"); }
+                        break;
+                    case "clearance":
+                        if (state.systems.activeThreats > 0 || state.systems.gridStability < 100) {
+                            const financialReward = (state.systems.activeThreats * 10) + (100 - state.systems.gridStability);
+                            state.player.currency += financialReward;
+                            state.systems.activeThreats = 0; state.systems.gridStability = 100;
+                            OffGridUI.log(`GRID INTEGRITY RESTORED. Recovered +${financialReward} CR.`);
+                            saveGame();
+                        } else { OffGridUI.log("No active anomalies detected inside the current cluster."); }
+                        break;
+                    case "shop":
+                        OffGridUI.log("<span class='magenta-text'>--- AO SYSTEM UPGRADES SHOP ---</span>");
+                        for (let key in state.shop) {
+                            let item = state.shop[key];
+                            OffGridUI.log(`• Protocol ID: <span class='cyan-text'>${key}</span> | ${item.name} (${item.count} Owned) | Cost: ${item.cost} CR`);
+                        }
+                        break;
+                    case "buy":
+                        let targetItem = args[1];
+                        if (!targetItem || !state.shop[targetItem]) { OffGridUI.log("ERROR: Invalid protocol ID."); break; }
+                        let choice = state.shop[targetItem];
+                        if (state.player.currency >= choice.cost) {
+                            state.player.currency -= choice.cost; choice.count += 1;
+                            OffGridUI.log(`PURCHASE SUCCESSFUL: Installed ${choice.name}.`);
+                            choice.cost = Math.floor(choice.cost * 1.5);
+                            if (targetItem === "shield") CONFIG.ALERT_INTERVAL += 3000;
+                            saveGame();
+                        } else { OffGridUI.log("INSUFFICIENT FUNDS."); }
+                        break;
+                    case "levelup":
+                        state.player.level += 1; OffGridUI.log(`Operator level scaled to: ${state.player.level}`); saveGame();
+                        break;
+                    case "clear":
+                        document.getElementById("terminal-log").innerHTML = ""; OffGridUI.log("Logs purged.");
+                        break;
+                    default:
+                        OffGridUI.log(`CRITICAL: Unknown command syntax '${cmd}'.`);
+                        break;
+                }
+            }
+
+            function saveGame() {
+                try {
+                    localStorage.setItem(CONFIG.SAVE_KEY, JSON.stringify(state.player));
+                    localStorage.setItem(CONFIG.SAVE_KEY + "_shop", JSON.stringify(state.shop));
+                } catch (e) {}
+            }
+
+            function loadGame() {
+                try {
+                    const savedData = localStorage.getItem(CONFIG.SAVE_KEY);
+                    const savedShop = localStorage.getItem(CONFIG.SAVE_KEY + "_shop");
+                    if (savedData) state.player = { ...state.player, ...JSON.parse(savedData) };
+                    if (savedShop) state.shop = { ...state.shop, ...JSON.parse(savedShop) };
+                } catch (e) {}
+            }
+
+            return { init: init, processCommand: processCommand };
+        })();
+
+        // --- STABILIZED LIFECYCLE CLOSURES ---
+        window.addEventListener("DOMContentLoaded", () => {
+            window.OffGridEngine = OffGridEngine;
+            OffGridEngine.init();
+        });
+
+        function triggerMacro(commandText) {
+            if (window.OffGridEngine) {
+                if (window.OffGridUI) {
+                    window.OffGridUI.log(`<span style="color: #ffffff;">&gt; ${commandText}</span>`);
+                }
+                window.OffGridEngine.processCommand(commandText);
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            const inputField = document.getElementById("terminal-input");
+            if (inputField) inputField.focus();
+            
+            document.body.addEventListener("click", () => {
+                const inputField = document.getElementById("terminal-input");
+                if (inputField) inputField.focus();
+            });
+        });
+    </script>
+</body>
+</html>
